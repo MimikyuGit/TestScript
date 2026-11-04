@@ -32,6 +32,11 @@ article {
     padding: 20px;
     border-radius: 10px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
 }
 
 article img {
@@ -47,6 +52,7 @@ article h2 {
     color: #333;
 }
 
+
 nav{
     width: 100%;
 
@@ -57,4 +63,84 @@ nav input{
     padding: 10px;
     border: 1px solid #ccc;
     width: 100%;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 1000;
+}
+
+.modal.oculto {
+    display: none;
+}
+
+.modal__contenido {
+    position: relative;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+
+    width: 90%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal__contenido h2 {
+    color: #444444;
+}
+.modal__contenido p {
+    color: #666666;
+    font-size: 16px;
+    text-align: center;
+    font-weight: 300;
+}
+
+.modal__contenido img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.modal__cerrar {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #fc1e1e;
+    border: none;
+    background: none;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.boton-detalles {
+    background-color: #333;
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 10px 18px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background-color 0.3s ease;
+}
+
+.boton-detalles:hover {
+    background-color: #555;
 }
