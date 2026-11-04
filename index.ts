@@ -1,5 +1,5 @@
 const ENDPOINT = "https://6aea21a23d3dd3d37be62a65.mockapi.io/api/v1/users";
-
+console.log("INDEX.TS CARGADO");
 // Estructura de los usuarios
 interface User {
     id: string;
@@ -9,6 +9,14 @@ interface User {
 
 // Obtenemos el contenedor HTML
 const contenedor = document.getElementById("lista-usuarios");
+
+//array para almacenar los usuarios y para filtrar despues
+let usuarios: User[] = [];
+
+const buscador = document.getElementById("buscador") as HTMLInputElement; //El htmlinput para especificar que es un input de texto y poder usar .value
+const botonBuscar = document.getElementById("btn-buscar");
+console.log(buscador);
+console.log(botonBuscar);
 
 // Función para consultar la API
 const getUsers = async () => {
@@ -25,6 +33,9 @@ const getUsers = async () => {
 
         const data: User[] = await response.json();
 
+        //Se guarda el array en la variable global papu
+        usuarios = data;
+
         console.log("Usuarios recibidos:", data);
 
         renderUsers(data);
@@ -36,11 +47,24 @@ const getUsers = async () => {
     }
 };
 
+function filterUsers() {
+    const busqueda = buscador.value.toLowerCase();
+
+    const usuariosFiltrados = usuarios.filter((user) => {
+        return user.name.toLowerCase().startsWith(busqueda);    });
+
+    renderUsers(usuariosFiltrados);
+}
+
+botonBuscar?.addEventListener("click", () => {
+    filterUsers();
+});
+
 // Función para mostrar los usuarios
 function renderUsers(users: User[]) {
 
     console.log("Entrando a renderUsers");
-
+//sixseven
     if (!contenedor) {
         console.error("No se encontró el contenedor HTML");
         return;
