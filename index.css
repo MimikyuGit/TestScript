@@ -46,3 +46,15 @@ article h2 {
     font-size: 18px;
     color: #333;
 }
+
+nav{
+    width: 100%;
+
+    justify-content: center;
+    margin-bottom: 20px;
+}
+nav input{
+    padding: 10px;
+    border: 1px solid #ccc;
+    width: 100%;
+}
