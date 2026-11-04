@@ -1,4 +1,3 @@
-
 const ENDPOINT = "https://6aea21a23d3dd3d37be62a65.mockapi.io/api/v1/users";
 
 console.log("INDEX.TS CARGADO");
@@ -10,19 +9,34 @@ interface User {
     avatar: string;
 }
 
-// Obtenemos el contenedor HTML
-const contenedor = document.getElementById("lista-usuarios");
+// Estructura de los detalles adicionales
+interface UserDetails {
+    id: string;
+    userId: string;
+    company: string;
+    birthdate: string;
+    biography: string;
+}
 
-// Array para almacenar los usuarios y filtrar después
+// Elementos HTML
+const contenedor = document.getElementById("lista-usuarios");
+const buscador = document.getElementById("buscador") as HTMLInputElement | null;
+
+// Elementos del modal
+const modal = document.getElementById("modal-detalles");
+const cerrarModal = document.getElementById("cerrar-modal");
+const nombreDetalle = document.getElementById("detalle-nombre");
+const avatarDetalle = document.getElementById("detalle-avatar") as HTMLImageElement | null;
+const biografiaDetalle = document.getElementById("detalle-biografia");
+const empresaDetalle = document.getElementById("detalle-empresa");
+const nacimientoDetalle = document.getElementById("detalle-nacimiento");
+
+// Array para almacenar los usuarios
 let usuarios: User[] = [];
 
-const buscador = document.getElementById("buscador") as HTMLInputElement;
-
-// Función para consultar la API
+// Consultar usuarios en la API
 const getUsers = async () => {
-
     try {
-
         console.log("Consultando API...");
 
         const response = await fetch(ENDPOINT);
@@ -33,7 +47,6 @@ const getUsers = async () => {
 
         const data: User[] = await response.json();
 
-        // Guardamos el array en la variable global
         usuarios = data;
 
         console.log("Usuarios recibidos:", data);
@@ -41,14 +54,13 @@ const getUsers = async () => {
         renderUsers(data);
 
     } catch (error) {
-
         console.error("Error:", error);
-
     }
 };
 
-// Función para filtrar usuarios
+// Filtrar usuarios
 function filterUsers() {
+    if (!buscador) return;
 
     const busqueda = buscador.value.toLowerCase();
 
@@ -59,14 +71,63 @@ function filterUsers() {
     renderUsers(usuariosFiltrados);
 }
 
-// LIVE SEARCH: detectar cada cambio en el input
-buscador.addEventListener("input", () => {
-    filterUsers();
-});
+// Consultar los detalles de un usuario
+async function getUserDetails(user: User) {
+    try {
+        console.log("Consultando detalles de:", user.name);
 
-// Función para mostrar los usuarios
+        const response = await fetch(`${ENDPOINT}/${user.id}/details`);
+
+        if (!response.ok) {
+            throw new Error("No se pudieron obtener los detalles");
+        }
+
+        const details: UserDetails[] = await response.json();
+
+        if (details.length === 0) {
+            throw new Error("Este usuario no tiene detalles");
+        }
+
+        const userDetails = details[0];
+
+        console.log("Detalles recibidos:", details);
+
+        // Mostrar la información en el modal
+        if (nombreDetalle) nombreDetalle.textContent = user.name;
+
+        if (avatarDetalle) {
+            avatarDetalle.src = user.avatar;
+            avatarDetalle.alt = `Imagen de ${user.name}`;
+        }
+
+        if (biografiaDetalle) {
+            biografiaDetalle.textContent = userDetails.biography || "Sin biografía disponible";
+        }
+
+        if (empresaDetalle) {
+            empresaDetalle.textContent = userDetails.company || "No especificada";
+        }
+
+        if (nacimientoDetalle) {
+            if (userDetails.birthdate) {
+                nacimientoDetalle.textContent =
+                    new Date(userDetails.birthdate).toLocaleDateString("es-CL");
+            } else {
+                nacimientoDetalle.textContent = "No especificada";
+            }
+        }
+
+        // Abrir modal
+        modal?.classList.remove("oculto");
+
+    } catch (error) {
+        console.error("Error al consultar detalles:", error);
+        alert("No se pudieron cargar los detalles de este usuario.");
+    }
+}
+
+// Mostrar usuarios en pantalla
 function renderUsers(users: User[]) {
-
     console.log("Entrando a renderUsers");
 
     if (!contenedor) {
@@ -74,44 +135,71 @@ function renderUsers(users: User[]) {
         return;
     }
 
-    // Limpiamos el contenedor
+    // Limpiar contenedor
     contenedor.innerHTML = "";
 
-    // Mensaje cuando no existen resultados
+    // Mensaje cuando no hay resultados
     if (users.length === 0) {
-
         const mensaje = document.createElement("h3");
-
-        mensaje.textContent = `Nobody Here but Us Chickens!`;
-
+        mensaje.textContent = "Nobody Here but Us Chickens!";
         contenedor.appendChild(mensaje);
         return;
     }
 
-    // Recorremos los usuarios
+    // Crear tarjetas
     users.forEach((user) => {
-
-        // Creamos los elementos HTML
         const tarjeta = document.createElement("article");
         const titulo = document.createElement("h2");
         const imagen = document.createElement("img");
+        const botonDetalles = document.createElement("button");
 
-        // Asignamos los datos
         titulo.textContent = user.name;
+
         imagen.src = user.avatar;
         imagen.alt = "Imagen de " + user.name;
 
-        // Agregamos los elementos a la tarjeta
+        botonDetalles.textContent = "Ver detalles del usuario";
+        
+        botonDetalles.classList.add("boton-detalles");
+        
+        // Evento para consultar los detalles
+        botonDetalles.addEventListener("click", () => {
+            getUserDetails(user);
+        });
+
         tarjeta.appendChild(imagen);
         tarjeta.appendChild(titulo);
+        tarjeta.appendChild(botonDetalles);
 
-        // Agregamos la tarjeta al contenedor
         contenedor.appendChild(tarjeta);
-
     });
 
     console.log("Usuarios mostrados correctamente");
 }
 
-// Ejecutamos la consulta
+// Buscador en tiempo real
+buscador?.addEventListener("input", () => {
+    filterUsers();
+});
+
+// Cerrar modal con el botón
+cerrarModal?.addEventListener("click", () => {
+    modal?.classList.add("oculto");
+});
+
+// Cerrar modal al presionar fuera de su contenido
+modal?.addEventListener("click", (event) => {
+    if (event.target === modal) {
+        modal.classList.add("oculto");
+    }
+});
+
+// Cerrar modal con Escape
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        modal?.classList.add("oculto");
+    }
+});
+
+// Ejecutar consulta inicial
 getUsers();
